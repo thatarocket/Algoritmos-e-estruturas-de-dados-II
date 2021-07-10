@@ -39,7 +39,7 @@ NO* busca(NO* raiz,int chave) {
 } 
 
 // Divisao de um no na arvore 
-bool separaFilho(NO* x, int indice, NO* irmao) { 
+bool separaFilho(NO* x, int indice, NO* irmao) { //(x,i,y) e z = inserir
   NO* inserir;
   if(!(inserir = (NO*) malloc(sizeof(NO)))) return false;
   inserir->folha = irmao->folha;
@@ -49,10 +49,14 @@ bool separaFilho(NO* x, int indice, NO* irmao) {
   if(!irmao->folha) for(int j = 0; j < t;j++) inserir->filhos[j] = irmao->filhos[j+t];
   irmao->numChaves = t-1;
 
-  for(int j = x->numChaves+1; j > indice+1;j--) x->filhos[j+1] = x->filhos[j];
+  for(int j = x->numChaves+1; j > indice+1;j--) {
+    printf("entrei \n");
+    x->filhos[j+1] = x->filhos[j];
+  }
   x->filhos[indice+1] = inserir;
-  for(int j = x->numChaves; j > indice; j--) x->chave[j+1] = x->chave[j];
-  x->chave[indice] = inserir->chave[t];
+
+  for(int j = x->numChaves+1; j > indice+1; j--) x->chave[j+1] = x->chave[j];
+  x->chave[indice] = irmao->chave[t-1];
   x->numChaves++;
   return true;
 } 
@@ -80,7 +84,7 @@ void insercaoNaoCheia(NO* x,int k) {
 }
 
 bool insercao(ArvB* T, int k) { //raiz T
-  printf("INSERCAO DO %i \n",k);
+  //printf("INSERCAO DO %i \n",k);
   if(busca(T->raiz,k)) return false;
   NO* r = T->raiz;
   if(r->numChaves == (2*t-1)) {
@@ -95,7 +99,6 @@ bool insercao(ArvB* T, int k) { //raiz T
     insercaoNaoCheia(s,k);
   }
   else insercaoNaoCheia(r,k);
-  printf("t->raiz num chaves %i \n",T->raiz->numChaves);
   return true;
 }
 
@@ -103,14 +106,13 @@ void remover(ArvB* T,int num) {
   printf("REMOVER \n");
 }
 
-void imprimir(NO* raiz,FILE* fsaida) {
-  //printf("%i \n",raiz->numChaves);
- /* if(raiz == NULL) return;
-  for(int i = 0; i < raiz->numChaves;i++) {
-    imprimir(raiz->filhos[i],fsaida); //lado esquerdo
-    printf ("%i ", raiz->chave[i]);
-  }
-  imprimir(raiz->filhos[raiz->numChaves+1],fsaida); //lado direito */
+void imprimir(ArvB* T,NO* raiz,FILE* fsaida) {
+    if(!raiz) return;
+    for(int i = 0; i < raiz->numChaves; i++){
+      if(!raiz->folha) if(raiz->filhos[i]) imprimir(T,raiz->filhos[i],fsaida);
+      printf("%i ",raiz->chave[i]);
+    }
+    if(!raiz->folha) if(raiz->filhos[raiz->numChaves]) imprimir(T,raiz->filhos[raiz->numChaves],fsaida);
 }
 
 int main(int argc,char *argv[]) {
@@ -126,9 +128,9 @@ int main(int argc,char *argv[]) {
     	int num;
       fscanf(f,"%i",&num);
       switch (comando) {
-        case 'i' : insercao(arvore,num); break;
+       0 case 'i' : insercao(arvore,num); break;
         case 'r' : remover(arvore,num); break;
-        case 'p' : imprimir(arvore->raiz,fsaida); break;
+        case 'p' : imprimir(arvore,arvore->raiz,fsaida); break;
         default: { //caso digite algo diferente
       		while (comando != '\n') scanf("%c",&comando);
       	}; 
