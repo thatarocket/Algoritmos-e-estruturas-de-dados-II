@@ -1,4 +1,3 @@
-
 // Thais de Souza Rodrigues - 11796941
 #include <stdio.h>
 #include <string.h>
@@ -103,9 +102,23 @@ bool insercao(ArvB* T, int k) { //raiz T
   return true;
 }
 
-void remover(ArvB* T,int num) {
-  printf("REMOVER \n");
+bool remover(NO* raiz,int chave) {
+  NO* eliminar = busca(raiz,chave);
+  if(!eliminar) return false; //se nao ha o valor na arvore
 }
+
+void removerDaRaiz(ArvB* T, int k) {
+  NÓ* r;
+  if(!(r = (NO*) malloc(sizeof(NO)))) return false;
+  r = T->raiz;
+  if(r->numChaves == 0) return;
+  else remover(r,k);
+  if(r->numChaves == 0 && (!r->folha)) {
+    T->raiz = r->filhos[0];
+    free(r);
+  }
+}
+
 
 void imprimir(ArvB* T,NO* raiz,FILE* fsaida) {
     if(!raiz) return;
@@ -130,7 +143,7 @@ int main(int argc,char *argv[]) {
       fscanf(f,"%i",&num);
       switch (comando) {
        0 case 'i' : insercao(arvore,num); break;
-        case 'r' : remover(arvore,num); break;
+        case 'r' : remover(arvore->raiz,num); break;
         case 'p' : imprimir(arvore,arvore->raiz,fsaida); break;
         default: { //caso digite algo diferente
       		while (comando != '\n') scanf("%c",&comando);
