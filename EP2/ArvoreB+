@@ -49,28 +49,24 @@ NO* busca(NO* raiz,int chave) { //A arvore b+ soh armazena nas folhas
 } 
 
 // Divisao de um no na arvore 
-bool separaFilho(NO* x, int indice, NO* irmao) { //(x,i,y) e z = inserir
-  // z/inserir é o lado direito da separação do split
-  // o x é o pai
-  // o irmao é o lado esquerdo da separação, que anteriormente continha todos
-  // indice é o que vai ser adicionado agora
+bool separaFilho(NO* x, int indice, NO* irmao) { //(x,i,y) e z
   // queremos passar a mediana pro pai e a chave copiada para o pai
 
-  NO* inserir;
-  if(!(inserir = (NO*) malloc(sizeof(NO)))) return false;
-  inserir->folha = irmao->folha;
-  inserir->numChaves = t-1;
+  NO* z;
+  if(!(z = (NO*) malloc(sizeof(NO)))) return false;
+  z->folha = irmao->folha; 
+  z->numChaves = t-1;
 
-  for(int i = 0; i < t-1;i++) inserir->chave[i] = irmao->chave[i+t]; 
-  if(!irmao->folha) for(int j = 0; j < t;j++) inserir->filhos[j] = irmao->filhos[j+t];
-  irmao->numChaves = t-1;
+  for(int i = 0; i < t-1;i++) z->chave[i] = irmao->chave[i+t]; 
+  if(!irmao->folha) for(int j = 0; j < t;j++) z->filhos[j] = irmao->filhos[j+t]; //Se nao eh folha, passa os filhos da direita
+  irmao->numChaves = t-1; 
+
 ////////////////////////////////////////////////////////////////////////////////////////
-  for(int j = x->numChaves+1; j > indice+1;j--) x->filhos[j+1] = x->filhos[j]; 
-  x->filhos[indice+1] = inserir; //Ele coloca o lado direito no pai
+  for(int j = x->numChaves+1; j > indice+1;j--) x->filhos[j+1] = x->filhos[j]; //Abre espaço nos filhos, para inserir o z
+  x->filhos[indice+1] = z; //Ele coloca o lado direito no pai, porque vai vir a mediana e vai ser o lado direito dela
 
-  for(int j = x->numChaves+1; j > indice+1; j--) x->chave[j+1] = x->chave[j];
-  x->chave[indice] = irmao->chave[t-1]; //Ele coloca as chaves no lado direito do pai?????
-
+  for(int j = x->numChaves+1; j > indice+1; j--) x->chave[j+1] = x->chave[j]; //Abre espaço nas chaves, para inserir a chave 
+  x->chave[indice] = irmao->chave[t]; //Indice da mediana sobe
   x->numChaves++;
   return true;
 } 
@@ -154,7 +150,7 @@ int main(int argc,char *argv[]) {
     	int num;
       fscanf(f,"%i",&num);
       switch (comando) {
-       0 case 'i' : insercao(arvore,num); break;
+        case 'i' : insercao(arvore,num); break;
         case 'r' : remover(arvore->raiz,num); break;
         case 'p' : imprimir(arvore,arvore->raiz,fsaida); break;
         default: { //caso digite algo diferente
