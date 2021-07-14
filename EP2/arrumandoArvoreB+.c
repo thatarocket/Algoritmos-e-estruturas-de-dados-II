@@ -11,67 +11,65 @@
 
 typedef int TipoChave;
 
-typedef struct struct_no {
-	TipoChave chaves[2*t-1];
-	struct str_no* filhos[2*t];
-	int numChaves;
-	bool folha;
+typedef struct str_no {
+  TipoChave chave[2*t-1];
+  struct str_no* filhos[2*t];
+  int numChaves;
+  bool folha;
 } NO;
 
 typedef struct {
-	NO* raiz;
+  NO* raiz;
 } ArvB;
 
 bool criaArvoreB(ArvB* T) {
-	NO* x;
-	if(!(X = (NO*) malloc(sizeof(NO)))) return false;
-	x->folha = true;
-	x->numChaves = 0;
-	T->raiz = x;
-	retorna true;
+  NO* x;
+  if(!(x = (NO*) malloc(sizeof(NO)))) return false;
+  x->folha = true;
+  x->numChaves = 0;
+  T->raiz = x;
+  return true;
 }
 
 NO* alocaNo() {
-	NO* x;
-	if(!(X = (NO*) malloc(sizeof(NO)))) return false;
-	if(!(x->chave) = (TipoChave*) malloc(sizeof(TipoChave))) return false;
-	if(!(x->filhos = (NO*) malloc(sizeof(NO*)))) return false;
-	return x;
+  NO* x;
+  if(!(x = (NO*) malloc(sizeof(NO)))) return false;
 }
 
-NO* busca(NO* raiz,int chave) { //A arvore b+ soh armazena nas folhas
-  if(!raiz) return false; 
-  int i = 0;
-  while(i < raiz->numChaves && chave < raiz->chave[i]) i++;
-  if(raiz->numChaves == i) {
-    if(!raiz->folha) busca(raiz->filhos[raiz->numChaves],chave) //Se nao eh folha, nao contem a informacao
-    else return false; 
+NO* busca(NO* raiz,int chave) {
+  int i = 1;
+  while(i <= raiz->numChaves && chave > raiz->chave[i]) i++;
+  if(i <= raiz->numChaves && chave == raiz->chave[i]) {
+    if(raiz->folha) return (raiz);
+    else return busca(raiz->filhos[i],chave);
   }
-  else if(chave < raiz->chave[i]) { 
-    if(!raiz->folha) busca(raiz->filhos[i],chave);
-    else return false;
-  }
-  else {
-  	if(raiz->folha) return raiz;
-  	else busca(raiz->filhos[i+1],chave);
-  }
+  else return NULL;
 } 
 
 void split(NO* x, int i, NO* y) {
-	NO* z = alocaNo();
-	z->folha = y->folha;
-	z->numChaves = t; //igual a t para pegar a mediana
-	for(j = 1; j <= t-1;j++) z->chave[j] = y->chave[j+t];
-	if(!y->folha) for(int j = 1; j <= t; j++) z->filhos[j] = y->filhos[j+t];
+  NO* z = alocaNo();
+  z->folha = y->folha;
+  z->numChaves = t; //igual a t para pegar a mediana
+  for(int j = 1; j <= t;j++) z->chave[j] = y->chave[j+t];
+    // t-1 = 2
+    // j = 1 j+3 = 4
+    // j = 2 j+3 = 5
+    // j = 3 j+3 = 6
+  if(!y->folha) for(int j = 1; j <= t+1; j++) z->filhos[j] = y->filhos[j+t];
+    // t+1 = 4
+    // j = 1 j+3 = 4
+    // j = 2 j+3 = 5
+    // j = 3 j+3 = 6
+    // j = 4 j+3 = 7
 
-	y->numChaves = t-1;
+  y->numChaves = t-1;
 
-	for(int j = x->numChaves+1; j < i+1;j--) x->filhos[j+1] = x->filhos[j];
-	x->filhos[i+1] = z;
+  for(int j = x->numChaves+1; j < i+1;j--) x->filhos[j+1] = x->filhos[j];
+  x->filhos[i+1] = z;
 
-	for(int j = x->numChaves; j < i;j--) x->chave[j+1] = x->chave[j];
-	x->chave[i] = z->chave[0];
-	x->numChaves++;
+  for(int j = x->numChaves; j < i;j--) x->chave[j+1] = x->chave[j];
+  x->chave[i] = z->chave[0];
+  x->numChaves++;
 }
 
 void insercaoNaoCheia(NO* x,int k) {
@@ -96,16 +94,24 @@ void insercaoNaoCheia(NO* x,int k) {
 }
 
 bool insercao(ArvB* T, int k) {
-	NO* r = T->raiz;
-	if(r->numChaves == (2*t-1)) { //está cheio
-		s = alocaNo();
-		s->numChaves = 0;
-		s->filhos[0] = r;
-		split(T->raiz,0,r);
-		insercaoNaoCheia(T->filhos[i],k);
-	}
-	else insercaoNaoCheia(T->filhos[i],k);
-	return true;
+  printf("INSERCAO do %i \n",k);
+  if(busca(T->raiz,k)) {
+    printf("REPETIDO \n");
+    return false;
+  }
+
+  NO* r = T->raiz;
+  if(r->numChaves == (2*t-1)) { //está cheio
+    NO* s = alocaNo();
+    T->raiz = s;
+    s->folha = false;
+    s->numChaves = 0;
+    s->filhos[1] = r;
+    split(s,1,r);
+    insercaoNaoCheia(s,k);
+  }
+  else insercaoNaoCheia(r,k);
+  return true;
 }
 
 bool remover(NO* raiz,int chave) {}
@@ -123,15 +129,15 @@ int main(int argc,char *argv[]) {
     char comando;
     fscanf(f,"%c",&comando);
     while (comando != 'f'){
-    	int num;
+      int num;
       fscanf(f,"%i",&num);
       switch (comando) {
-       	case 'i' : insercao(arvore,num); break;
+        case 'i' : insercao(arvore,num); break;
         case 'r' : remover(arvore->raiz,num); break;
         case 'p' : imprimir(arvore,arvore->raiz,fsaida); break;
         default: { //caso digite algo diferente
-      		while (comando != '\n') scanf("%c",&comando);
-      	}; 
+          while (comando != '\n') scanf("%c",&comando);
+        }; 
       }
       fscanf(f,"%c",&comando);
     }
