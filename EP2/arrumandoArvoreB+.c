@@ -31,25 +31,23 @@ bool criaArvoreB(ArvB* T) {
 	retorna true;
 }
 
-bool alocaNo(bool folha) {
+NO* alocaNo() {
 	NO* x;
 	if(!(X = (NO*) malloc(sizeof(NO)))) return false;
 	if(!(x->chave) = (TipoChave*) malloc(sizeof(TipoChave))) return false;
-	if(!(folha)) {
-		if(!(x->filhos = (NO*) malloc(sizeof(NO*)))) return false;
-	}
-	else x->filhos = NULL;
+	if(!(x->filhos = (NO*) malloc(sizeof(NO*)))) return false;
+	return x;
 }
 
 NO* busca(NO* raiz,int chave) { //A arvore b+ soh armazena nas folhas
   if(!raiz) return false; 
   int i = 0;
-  while(i < raiz->numChaves && chave > raiz->chave[i]) i++;
+  while(i < raiz->numChaves && chave < raiz->chave[i]) i++;
   if(raiz->numChaves == i) {
     if(!raiz->folha) busca(raiz->filhos[raiz->numChaves],chave) //Se nao eh folha, nao contem a informacao
     else return false; 
   }
-  else if(chave > raiz->chave[i]) { 
+  else if(chave < raiz->chave[i]) { 
     if(!raiz->folha) busca(raiz->filhos[i],chave);
     else return false;
   }
@@ -58,6 +56,62 @@ NO* busca(NO* raiz,int chave) { //A arvore b+ soh armazena nas folhas
   	else busca(raiz->filhos[i+1],chave);
   }
 } 
+
+void split(NO* x, int i, NO* y) {
+	NO* z = alocaNo();
+	z->folha = y->folha;
+	z->numChaves = t-1;
+	for(j = 1; j < t-1;j++) z->chave[j] = y->chave[j+t];
+	if(!y->folha) for(int j = 1; j < t; j++) z->filhos[j] = y->filhos[j+t];
+
+	y->numChaves = t-1;
+
+	for(int j = x->numChaves+1; j < i+1;j--) x->filhos[j+1] = x->filhos[j];
+	x->filhos[i+1] = z;
+
+	for(int j = x->numChaves; j < i;j--) x->chave[j+1] = x->chave[j];
+	x->chave[i] = y->chave[t];
+	x->numChaves++;
+}
+
+void insercaoNaoCheia(NO* x,int k) {
+  int i = x->numChaves;
+  if(x->folha) {
+    while(i >= 1 && k < x->chave[i]) {
+      x->chave[i+1] = x->chave[i];
+      i--;
+    }
+    x->chave[i+1] = k;
+    x->numChaves++;
+  }
+  else {
+    while(i >= 1 && k < x->chave[i]) i--;
+    i++;
+    if((x->filhos[i])->numChaves == 2*t-1) {
+      split(x,i,x->filhos[i]);
+      if(k > x->chave[i]) i++;
+    }
+    insercaoNaoCheia(x->filhos[i],k);
+  }
+}
+
+bool insercao(ArvB* T, int k) {
+	NO* r = T->raiz;
+	if(r->numChaves == (2*t-1)) { //está cheio
+		s = alocaNo();
+		s->numChaves = 0;
+		s->filhos[0] = r;
+		split(T->raiz,0,r);
+		insercaoNaoCheia(T->filhos[i],k);
+	}
+	else insercaoNaoCheia(T->filhos[i],k);
+	return true;
+}
+
+bool remover(NO* raiz,int chave) {}
+void removerDaRaiz(ArvB* T, int k) {}
+void imprimir(ArvB* T, NO* raiz, FILE* fsaida) {}
+
 
 int main(int argc,char *argv[]) {
   FILE *f,*fsaida;
