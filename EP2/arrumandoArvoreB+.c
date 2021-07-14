@@ -60,9 +60,9 @@ NO* busca(NO* raiz,int chave) { //A arvore b+ soh armazena nas folhas
 void split(NO* x, int i, NO* y) {
 	NO* z = alocaNo();
 	z->folha = y->folha;
-	z->numChaves = t-1;
-	for(j = 1; j < t-1;j++) z->chave[j] = y->chave[j+t];
-	if(!y->folha) for(int j = 1; j < t; j++) z->filhos[j] = y->filhos[j+t];
+	z->numChaves = t; //igual a t para pegar a mediana
+	for(j = 1; j <= t-1;j++) z->chave[j] = y->chave[j+t];
+	if(!y->folha) for(int j = 1; j <= t; j++) z->filhos[j] = y->filhos[j+t];
 
 	y->numChaves = t-1;
 
@@ -70,7 +70,7 @@ void split(NO* x, int i, NO* y) {
 	x->filhos[i+1] = z;
 
 	for(int j = x->numChaves; j < i;j--) x->chave[j+1] = x->chave[j];
-	x->chave[i] = y->chave[t];
+	x->chave[i] = z->chave[0];
 	x->numChaves++;
 }
 
