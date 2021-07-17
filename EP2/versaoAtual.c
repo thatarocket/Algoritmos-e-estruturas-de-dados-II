@@ -12,7 +12,7 @@
 typedef int TipoChave;
 
 typedef struct str_folha {
-  Tipochave chave[2*t-1];
+  TipoChave chave[2*t-1];
   int numChaves;
   struct str_folha* prox;
   bool folha;
@@ -37,13 +37,13 @@ bool criaArvoreB(ArvB* T) {
   NO* x;
   if(!(x = (NO*) malloc(sizeof(NO)))) return false;
   FOLHA* folhas;
-  if(!(folhas = (NO*) malloc(sizeof(NO)))) return false;
+  if(!(folhas = (FOLHA*) malloc(sizeof(FOLHA)))) return false;
 
   x->filhosFolha = NULL;
   x->numChaves = 0;
   x->folha = false; //Pra garantir que vai verificar certinho
 
-  folha->numChaves = 0;
+  folhas->numChaves = 0;
   folhas->prox = NULL;
   folhas->folha = true; 
 
@@ -64,7 +64,7 @@ FOLHA* alocaFolha() {
   return x;
 }
 
-NO* busca(FOLHA* raiz,int chave) {
+FOLHA* busca(FOLHA* raiz,int chave) {
   int i = 1;
   while(raiz) { //enquanto houver proximos
     while(i <= raiz->numChaves && chave > raiz->chave[i]) i++;
@@ -74,41 +74,74 @@ NO* busca(FOLHA* raiz,int chave) {
   return NULL;
 } 
 
-void split(NO* x, int i, NO* y) {
-  NO* z = alocaNo();
+void split(NO* x, NO* y) { //lidando com o split que é do no interno
+  NO* z = alocaNo(); //lado direito
   z->folha = y->folha;
-  z->numChaves = t; //igual a t para pegar a mediana
-  for(int j = 1; j < t-1;j++) z->chave[j] = y->chave[j+t];
-  if(!y->folha) for(int j = 1; j < t; j++) z->filhos[j] = y->filhos[j+t];
+  z->numChaves = t-1;
 
+  for(int j = 1; j < t;j++) z->chave[j] = y->chave[j+t];
+  if(!y->folha) { //se nao eh folha, tem filhos. Se tem filhos, o que o filho eh?
+    if(!y->filhosFolha) for(int j = 1; j < t+1; j++) z->filhos[j] = y->filhos[j+t];
+    else { //Se eh folha, eu tenho que fazer o z apontar para eles
+      FOLHA* dividir = y->filhosFolha;
+      for(int i = 1; i < t;i++) dividir = dividir->prox; //passando até depois da mediana
+      z->filhosFolha = alocaFolha();
+      z->filhosFolha = dividir; //passo os filhos para o z apontar
+    }
+  }
   y->numChaves = t-1;
 
-  for(int j = x->numChaves+1; j > i+1;j--) x->filhos[j+1] = x->filhos[j];
-  x->filhos[i+1] = z;
+  for(int j = x->numChaves+1; j > 2;j--) x->filhos[j+1] = x->filhos[j];
+  x->filhos[2] = z;
 
-  for(int j = x->numChaves; j > i;j--) x->chave[j+1] = x->chave[j];
-  x->chave[i] = z->chave[0];
+  for(int j = x->numChaves; j > 1;j--) x->chave[j+1] = x->chave[j];
+  x->chave[1] = y->chave[t]; //mediana pro pai
   x->numChaves++;
 }
 
-void insercaoNaoCheia(NO* r,int k) {
+void splitFolha(NO* x, FOLHA* y) { //lidando com o split que é do no interno
+  FOLHA* z = alocaFolha(); //lado direito
+  z->folha = y->folha;
+  z->numChaves = t-1;
+
+  for(int j = 1; j < t;j++) z->chave[j] = y->chave[j+t]; 
+  FOLHA* dividir = y->filhosFolha;
+  for(int i = 1; i < t;i++) dividir = dividir->prox; //passando até depois da mediana
+  z->filhosFolha = alocaFolha();
+  z->filhosFolha = dividir; //passo os filhos para o z apontar
+
+  y->numChaves = t-1;
+
+  for(int j = x->numChaves+1; j > 2;j--) x->filhos[j+1] = x->filhos[j];
+  x->filhos[2] = z;
+
+  for(int j = x->numChaves; j > 1;j--) x->chave[j+1] = x->chave[j];
+  x->chave[1] = y->chave[t]; //mediana pro pai
+  x->numChaves++;
+}
+
+void insercaoNaoCheia(NO* x,int k,FOLHA* f) {
   int i = x->numChaves;
-  if(x->folha) {
+  FOLHA* atual = x->filhosFolha;
+  FOLHA* prox = x->filhosFolha;
+  if(x->filhosFolha) {
     while(i >= 1 && k < x->chave[i]) {
-      x->chave[i+1] = x->chave[i];
+      atual = atual->prox;
       i--;
     }
-    x->chave[i+1] = k;
-    x->numChaves++;
+    atual->prox = x->filhosFolha->prox; 
+    x->filhosFolha->prox = atual;
+    atual->chave[i+1] = k;
+    atual->numChaves++;
   }
   else {
     while(i >= 1 && k < x->chave[i]) i--;
     i++;
     if((x->filhos[i])->numChaves == 2*t-1) {
-      split(x,i,x->filhos[i]);
+      split(x,x->filhos[i]);
       if(k > x->chave[i]) i++;
     }
-    insercaoNaoCheia(x->filhos[i],k);
+    insercaoNaoCheia(x->filhos[i],k,f);
   }
 }
 
@@ -129,17 +162,19 @@ bool insercao(ArvB* T, int k) {
     s->numChaves = 0;
     s->filhos[1] = r;
     split(s,r); //split quando nao envolve folhas
-    insercaoNaoCheia(s,k); //adicionar no indice
-    insercaoNaoCheiaF(r,f,k); //adicionar na folha
+    insercaoNaoCheia(s,k,f); //adicionar no indice
   }
-  else if(r->numChaves == (2*t-1)) { // eh folha
-    splitFolha(r,f); //split envolvendo folhas
-    insercaoNaoCheia(r,k); //adicionar no indice
-    insercaoNaoCheiaF(r,f,k); //adicionar na folha
+  else if(f->numChaves == (2*t-1)) { // eh folha
+    NO* s = alocaNo();
+    T->raiz = s;
+    s->folha = false;
+    s->numChaves = 0;
+    s->filhosFolha = f;
+    splitFolha(s,f); //split envolvendo folhas
+    insercaoNaoCheia(r,k,f); //adicionar no indice
   }
   else { //nao ta cheio
-    insercaoNaoCheia(r,k); //adicionar no indice
-    insercaoNaoCheiaF(r,f,k); //adicionar na folha
+    insercaoNaoCheia(r,k,f); //adicionar no indice
   }
   return true;
 }
@@ -149,6 +184,16 @@ bool remover(NO* raiz,int chave) {
 }
 void removerDaRaiz(ArvB* T, int k) {}
 void imprimir(ArvB* T, NO* raiz) {
+  printf("nós folhas: \n (");
+  FOLHA* f = T->folhas;
+  int i = 1;
+  while(f) {
+    f = f->prox;
+    printf("%i ",f->chave[i]);
+    i++;
+  }
+  printf(")\n");
+  //depois printar em in ordem
 
 }
 
