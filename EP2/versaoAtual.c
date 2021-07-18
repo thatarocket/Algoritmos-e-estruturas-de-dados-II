@@ -79,7 +79,7 @@ void split(NO* x, NO* y) { //lidando com o split que é do no interno
   z->folha = y->folha;
   z->numChaves = t-1;
 
-  for(int j = 1; j < t;j++) z->chave[j] = y->chave[j+t];
+  for(int j = 1; j <= t;j++) z->chave[j] = y->chave[j+t-1];
   if(!y->folha) { //se nao eh folha, tem filhos. Se tem filhos, o que o filho eh?
     if(!y->filhosFolha) for(int j = 1; j < t+1; j++) z->filhos[j] = y->filhos[j+t];
     else { //Se eh folha, eu tenho que fazer o z apontar para eles
@@ -101,19 +101,19 @@ void split(NO* x, NO* y) { //lidando com o split que é do no interno
 
 void splitFolha(NO* x, FOLHA* y) { //lidando com o split que é do no interno
   FOLHA* z = alocaFolha(); //lado direito
-  z->folha = y->folha;
-  z->numChaves = t-1;
 
-  for(int j = 1; j < t;j++) z->chave[j] = y->chave[j+t]; 
-  FOLHA* dividir = y->filhosFolha;
-  for(int i = 1; i < t;i++) dividir = dividir->prox; //passando até depois da mediana
-  z->filhosFolha = alocaFolha();
-  z->filhosFolha = dividir; //passo os filhos para o z apontar
+  FOLHA* dividir = y;
+  for(int j = 1; j <= t;j++) {
+    z->chave[j] = y->chave[j+t-1]; 
+    dividir = dividir->prox;
+  }
+  z = dividir;
+  z->folha = true;
+  z->numChaves = t-1;
 
   y->numChaves = t-1;
 
-  for(int j = x->numChaves+1; j > 2;j--) x->filhos[j+1] = x->filhos[j];
-  x->filhos[2] = z;
+  x->filhosFolha->prox = z;
 
   for(int j = x->numChaves; j > 1;j--) x->chave[j+1] = x->chave[j];
   x->chave[1] = y->chave[t]; //mediana pro pai
@@ -153,7 +153,7 @@ bool insercao(ArvB* T, int k) {
   }
 
   NO* r = T->raiz;
-  NO* f = T->folhas;
+  FOLHA* f = T->folhas;
 
   if(r->numChaves == (2*t-1) && (!r->folha)) { //está cheio na raiz
     NO* s = alocaNo();
