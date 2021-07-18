@@ -32,12 +32,12 @@ typedef struct {
   FOLHA* folhas;
 } ArvB;
 
-bool criaArvoreB(ArvB* T) {
-  T = (ArvB*) malloc(sizeof(ArvB));
+ArvB* criaArvoreB(ArvB* T) {
+  ArvB* criar = (ArvB*) malloc(sizeof(ArvB));
   NO* x;
-  if(!(x = (NO*) malloc(sizeof(NO)))) return false;
+  if(!(x = (NO*) malloc(sizeof(NO)))) return NULL;
   FOLHA* folhas;
-  if(!(folhas = (FOLHA*) malloc(sizeof(FOLHA)))) return false;
+  if(!(folhas = (FOLHA*) malloc(sizeof(FOLHA)))) return NULL;
 
   x->filhosFolha = NULL;
   x->numChaves = 0;
@@ -47,9 +47,9 @@ bool criaArvoreB(ArvB* T) {
   folhas->prox = NULL;
   folhas->folha = true; 
 
-  T->raiz = x;
-  T->folhas = folhas;
-  return true;
+  criar->raiz = x;
+  criar->folhas = folhas;
+  return criar;
 }
 
 NO* alocaNo() {
@@ -66,6 +66,7 @@ FOLHA* alocaFolha() {
 
 FOLHA* busca(FOLHA* raiz,int chave) {
   int i = 1;
+  printf("oi \n");
   while(raiz) { //enquanto houver proximos
     while(i <= raiz->numChaves && chave > raiz->chave[i]) i++;
     if(chave > raiz->chave[i]) raiz->prox; //Eh maior que esse bloco atual, olha o proximo bloco
@@ -147,11 +148,12 @@ void insercaoNaoCheia(NO* x,int k,FOLHA* f) {
 
 bool insercao(ArvB* T, int k) {
   printf("INSERCAO do %i \n",k);
+  if(!T) printf("errado \n");
   if(busca(T->folhas,k)) { //tirar depois, usar so para testar se funciona
     printf("REPETIDO \n");
     return false;
   }
-
+  printf("voltei \n");
   NO* r = T->raiz;
   FOLHA* f = T->folhas;
 
@@ -184,7 +186,7 @@ bool remover(NO* raiz,int chave) {
 }
 void removerDaRaiz(ArvB* T, int k) {}
 void imprimir(ArvB* T, NO* raiz) {
-  printf("nós folhas: \n (");
+  printf("nos folhas: \n (");
   FOLHA* f = T->folhas;
   int i = 1;
   while(f) {
@@ -203,8 +205,7 @@ int main(int argc,char *argv[]) {
   if(!(f = fopen(argv[1],"r"))) return 0;
   else {
     fsaida = fopen(argv[2],"w+");
-    ArvB* arvore;
-    criaArvoreB(arvore);
+    ArvB* arvore = criaArvoreB(arvore);
     char comando;
     fscanf(f,"%c",&comando);
     while (comando != 'f'){
