@@ -61,7 +61,7 @@ NO* busca(NO* raiz,int chave) {
 } 
 
 bool split(NO* x, NO* y) { //lidando com o split que é do no interno
-  printf("SPLIT \n");
+  printf("split \n");
   NO* z = alocaNo();
   z->folha = y->folha; 
   z->numChaves = t;
@@ -76,11 +76,11 @@ bool split(NO* x, NO* y) { //lidando com o split que é do no interno
   for(int j = x->numChaves; j > 1; j--) x->chave[j+1] = x->chave[j];
   x->chave[1] = y->chave[t]; 
   x->numChaves++;
+
   return true;
 } 
 
 void insercaoNaoCheia(NO* x,int k) {
-  printf("insercaoNaoCheia do %i \n",k);
   int i = x->numChaves;
   if(x->folha) {
     while(i >= 1 && k < x->chave[i]) {
@@ -102,11 +102,7 @@ void insercaoNaoCheia(NO* x,int k) {
 }
 
 bool insercao(ArvB* T, int k) {
-  printf("INSERCAO %i \n",k);
-  if(busca(T->raiz,k)) { //TIRAR DEPOIS, usar so para testar se funciona
-    printf("REPETIDO \n");
-    return false;
-  }
+  printf("inserindo o k %i \n",k);
   NO* r = T->raiz;
   if(r->numChaves == (2*t-1)) { //está cheio na raiz
     NO* s = alocaNo();
@@ -115,8 +111,7 @@ bool insercao(ArvB* T, int k) {
     s->numChaves = 0;
     s->filhos[1] = r;
     split(s,r);
-    printf("aqui1 \n");
-    imprimir(T,T->raiz); //TIRAR DEPOIS, SÓ PRA TESTAR
+    printf("sai \n");
     insercaoNaoCheia(s,k);
   }
   else insercaoNaoCheia(r,k);
@@ -130,25 +125,31 @@ bool remover(NO* raiz,int chave) {
 void removerDaRaiz(ArvB* T, int k) {}
 
 void imprimir(ArvB* T, NO* raiz) {
-  int j = 1;
-  NO* andando = raiz;
-  if(!andando) return;
   if(T->raiz->numChaves == 0) {
     printf("vazia \n");
     return;
-  } 
-  for(int i = 1; i <= andando->numChaves; i++){
-    printf("(");
-    if(!andando->folha) {
-      while(andando->filhos[j]) {
-        imprimir(T,andando->filhos[i]);
-        j++;
-      }
-    }
-    printf("%i ",andando->chave[i]);
-    if(!andando->folha) printf(")");
   }
-  printf(")");
+  printf("(");
+  for(int j = 1; j < T->raiz->numChaves+1;j++) {
+    if(!T->raiz->folha) {
+      printf("(");
+      for(int i = 1; i < T->raiz->filhos[j]->numChaves+1; i++) {
+        printf("%i", T->raiz->filhos[j]->chave[i]); // filhos esquerda
+        if(i < T->raiz->filhos[j]->numChaves) printf(" ");
+      }
+      printf(") ");
+    }
+    printf("%i", T->raiz->chave[j]); // imprime a raiz
+    if(!T->raiz->folha) {
+      printf(" (");
+      for(int k = 1; k < T->raiz->filhos[j+1]->numChaves+1; k++) { 
+        printf("%i", T->raiz->filhos[j+1]->chave[k]); //filhos direita
+        if(k < T->raiz->filhos[j+1]->numChaves) printf(" ");
+      }
+      printf(")"); 
+    }
+  }
+  printf(")\n"); 
 }
 
 int main(int argc,char *argv[]) {
