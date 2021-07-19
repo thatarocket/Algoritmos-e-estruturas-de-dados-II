@@ -26,7 +26,7 @@ typedef struct {
 ArvB* criaArvoreB(ArvB* T);
 NO* alocaNo();
 NO* busca(NO* raiz,int chave);
-bool split(NO* x, NO* y);
+bool split(NO* x,int indice, NO* y);
 void insercaoNaoCheia(NO* x,int k);
 bool insercao(ArvB* T, int k);
 bool remover(NO* raiz,int chave);
@@ -60,7 +60,7 @@ NO* busca(NO* raiz,int chave) {
   else return NULL;
 } 
 
-bool split(NO* x, NO* y) { //lidando com o split que é do no interno
+bool split(NO* x,int i, NO* y) { //lidando com o split que é do no interno
   printf("split \n");
   NO* z = alocaNo();
   z->folha = y->folha; 
@@ -70,11 +70,11 @@ bool split(NO* x, NO* y) { //lidando com o split que é do no interno
   if(!y->folha) for(int j = 1; j <= t+1;j++) z->filhos[j] = y->filhos[j+t]; 
   y->numChaves = t-1; 
 
-  for(int j = x->numChaves+1; j > 2;j--) x->filhos[j+1] = x->filhos[j];
-  x->filhos[2] = z; 
+  for(int j = x->numChaves+1; j > i+1;j--) x->filhos[j+1] = x->filhos[j];
+  x->filhos[i+1] = z; 
 
-  for(int j = x->numChaves; j > 1; j--) x->chave[j+1] = x->chave[j];
-  x->chave[1] = y->chave[t]; 
+  for(int j = x->numChaves; j > i; j--) x->chave[j+1] = x->chave[j];
+  x->chave[i] = y->chave[t]; 
   x->numChaves++;
 
   return true;
@@ -93,8 +93,15 @@ void insercaoNaoCheia(NO* x,int k) {
   else {
     while(i >= 1 && k < x->chave[i]) i--;
     i++;
-    if((x->filhos[i])->numChaves == 2*t-1) {
-      split(x,x->filhos[i]);
+    if((x->filhos[i])->numChaves == 2*t-1) { // i = 2
+      split(x,i,x->filhos[i]);
+      printf("depois insercao \n");
+
+      for(int i = 1; i <= x->numChaves;i++) printf("x: %i ",x->chave[i]);
+      printf(" ");
+      for(int i = 1; i <= x->filhos[i]->numChaves;i++) printf("x filho: %i ",x->filhos[i]->chave[i]);
+      printf(" ");
+
       if(k > x->chave[i]) i++;
     }
     insercaoNaoCheia(x->filhos[i],k);
@@ -110,8 +117,7 @@ bool insercao(ArvB* T, int k) {
     s->folha = false;
     s->numChaves = 0;
     s->filhos[1] = r;
-    split(s,r);
-    printf("sai \n");
+    split(s,1,r);
     insercaoNaoCheia(s,k);
   }
   else insercaoNaoCheia(r,k);
