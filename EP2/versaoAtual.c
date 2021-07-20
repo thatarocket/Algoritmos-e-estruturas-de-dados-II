@@ -93,15 +93,8 @@ void insercaoNaoCheia(NO* x,int k) {
   else {
     while(i >= 1 && k < x->chave[i]) i--;
     i++;
-    if((x->filhos[i])->numChaves == 2*t-1) { // i = 2
+    if((x->filhos[i])->numChaves == 2*t-1) { 
       split(x,i,x->filhos[i]);
-      printf("depois insercao \n");
-
-      for(int i = 1; i <= x->numChaves;i++) printf("x: %i ",x->chave[i]);
-      printf(" ");
-      for(int i = 1; i <= x->filhos[i]->numChaves;i++) printf("x filho: %i ",x->filhos[i]->chave[i]);
-      printf(" ");
-
       if(k > x->chave[i]) i++;
     }
     insercaoNaoCheia(x->filhos[i],k);
