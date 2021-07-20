@@ -70,10 +70,10 @@ bool split(NO* x,int i, NO* y) { //lidando com o split que é do no interno
   if(!y->folha) for(int j = 1; j <= t+1;j++) z->filhos[j] = y->filhos[j+t]; 
   y->numChaves = t-1; 
 
-  for(int j = x->numChaves+1; j > i+1;j--) x->filhos[j+1] = x->filhos[j];
+  for(int j = x->numChaves+1; j >= i+1;j--) x->filhos[j+1] = x->filhos[j];
   x->filhos[i+1] = z; 
 
-  for(int j = x->numChaves; j > i; j--) x->chave[j+1] = x->chave[j];
+  for(int j = x->numChaves; j >= i; j--) x->chave[j+1] = x->chave[j];
   x->chave[i] = y->chave[t]; 
   x->numChaves++;
 
@@ -97,6 +97,7 @@ void insercaoNaoCheia(NO* x,int k) {
       split(x,i,x->filhos[i]);
       if(k > x->chave[i]) i++;
     }
+
     insercaoNaoCheia(x->filhos[i],k);
   }
 }
@@ -129,7 +130,7 @@ void imprimir(ArvB* T, NO* raiz) {
     return;
   }
   printf("(");
-  for(int j = 1; j < T->raiz->numChaves+1;j++) {
+  for(int j = 1; j < T->raiz->numChaves*2;j++) {
     if(!T->raiz->folha) {
       printf("(");
       for(int i = 1; i < T->raiz->filhos[j]->numChaves+1; i++) {
@@ -138,15 +139,7 @@ void imprimir(ArvB* T, NO* raiz) {
       }
       printf(") ");
     }
-    printf("%i", T->raiz->chave[j]); // imprime a raiz
-    if(!T->raiz->folha) {
-      printf(" (");
-      for(int k = 1; k < T->raiz->filhos[j+1]->numChaves+1; k++) { 
-        printf("%i", T->raiz->filhos[j+1]->chave[k]); //filhos direita
-        if(k < T->raiz->filhos[j+1]->numChaves) printf(" ");
-      }
-      printf(")"); 
-    }
+    if(j < T->raiz->numChaves+1) printf("%i", T->raiz->chave[j]); // imprime a raiz
   }
   printf(")\n"); 
 }
