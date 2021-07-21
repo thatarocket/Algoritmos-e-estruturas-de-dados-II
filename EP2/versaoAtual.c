@@ -130,7 +130,7 @@ void imprimir(ArvB* T, NO* raiz) {
     return;
   }
   printf("(");
-  for(int j = 1; j < T->raiz->numChaves*2;j++) {
+  for(int j = 1; j < T->raiz->numChaves+2;j++) {
     if(!T->raiz->folha) {
       printf("(");
       for(int i = 1; i < T->raiz->filhos[j]->numChaves+1; i++) {
