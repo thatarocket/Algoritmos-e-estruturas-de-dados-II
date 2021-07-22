@@ -12,8 +12,8 @@
 typedef int TipoChave;
 
 typedef struct str_no {
-  TipoChave chave[2*t-1]; //max chaves do no
-  struct str_no* filhos[2*t]; //max filhos do no
+  TipoChave chave[2*t]; //max chaves do no. 2t-1 com 0 = 2t
+  struct str_no* filhos[2*t+1]; //max filhos do no. 2t com 0 = 2t+1
   int numChaves; //num chaves armazenadas
   bool folha; //folha ou no interno
   struct str_no* prox;
@@ -45,8 +45,7 @@ ArvB* criaArvoreB(ArvB* T) {
 }
 
 NO* alocaNo() {
-  NO* x;
-  if(!(x = (NO*) malloc(sizeof(NO)))) return false;
+  NO* x = (NO*) malloc(sizeof(NO));
   return x;
 }
 
@@ -72,11 +71,12 @@ bool split(NO* x,int i, NO* y) { //lidando com o split que é do no interno
 
   for(int j = x->numChaves+1; j >= i+1;j--) x->filhos[j+1] = x->filhos[j];
   x->filhos[i+1] = z; 
-
-  for(int j = x->numChaves; j >= i; j--) x->chave[j+1] = x->chave[j];
+  for(int j = x->numChaves; j >= i; j--) x->chave[j+1] = x->chave[j];  
   x->chave[i] = y->chave[t]; 
   x->numChaves++;
 
+  y->prox = z;
+  z->prox = NULL;
   return true;
 } 
 
@@ -93,8 +93,10 @@ void insercaoNaoCheia(NO* x,int k) {
   else {
     while(i >= 1 && k < x->chave[i]) i--;
     i++;
+    printf("o i %i \n",i);
     if((x->filhos[i])->numChaves == 2*t-1) { 
       split(x,i,x->filhos[i]);
+      printf("sai \n");
       if(k > x->chave[i]) i++;
     }
 
@@ -125,6 +127,7 @@ bool remover(NO* raiz,int chave) {
 void removerDaRaiz(ArvB* T, int k) {}
 
 void imprimir(ArvB* T, NO* raiz) {
+  printf("entrei \n");
   if(T->raiz->numChaves == 0) {
     printf("vazia \n");
     return;
@@ -133,13 +136,13 @@ void imprimir(ArvB* T, NO* raiz) {
   for(int j = 1; j < T->raiz->numChaves+2;j++) {
     if(!T->raiz->folha) {
       printf("(");
-      for(int i = 1; i < T->raiz->filhos[j]->numChaves+1; i++) {
+      for(int i = 1; i <= T->raiz->filhos[j]->numChaves; i++) {
         printf("%i", T->raiz->filhos[j]->chave[i]); // filhos esquerda
         if(i < T->raiz->filhos[j]->numChaves) printf(" ");
       }
       printf(") ");
     }
-    if(j < T->raiz->numChaves+1) printf("%i", T->raiz->chave[j]); // imprime a raiz
+    if(j <= T->raiz->numChaves) printf("%i", T->raiz->chave[j]); // imprime a raiz
   }
   printf(")\n"); 
 }
