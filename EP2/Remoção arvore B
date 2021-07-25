@@ -1,0 +1,27 @@
+Remoção arvore B
+Casos:
+
+1) Está na folha
+-> Simplesmente remove
+
+2) Chave está em um nó interno
+
+A) O filho y anterior ao que k, tem pelo menos t chaves
+-> Pega o maior de todooos os filhos da esquerda, que sao folhas, e troca pelo que vai ser removido
+
+B) Se o filho da esquerda nao tem o minimo de t chaves, olha para o filho da direita e ve se tem o minimo de chaves. Se tiver, troca. 
+
+C) Nem esquerda e direita dos filhos tem o minimo de chaves
+-> Une os filhos da esquerda e direita e puxa a mediana de volta
+-> Deleta o k
+-> Se for no interno, une os filhos tambem
+
+3) Chave nao esta no nó interno x
+-> Procura nas folhas também
+
+A) A onde está o k, está no limite de chaves. O irmão está com t chaves, seja esquerda ou direita
+-> Desce o pai, sobe o do irmão
+
+B) Nenhum irmao tem como mandar. Todos estao no limite de chaves. 
+-> Junta os irmaos, desce a mediana e remove o k
+
