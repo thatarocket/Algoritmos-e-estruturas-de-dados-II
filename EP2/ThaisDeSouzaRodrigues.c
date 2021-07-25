@@ -127,37 +127,58 @@ bool insercao(ArvB* T, int k) {
 
 }
 
-bool juntando(NO* x,int i, NO* y, NO* z) {}
+bool juntar(NO* x,int i, NO* y, NO* z) {}
 
 bool remover(NO* raiz,int chave) {
   printf("REMOVER \n");
-  NO* removido;
-  NO* atual;
-
+  NO* pai = raiz;
   if(!busca(raiz,chave)) return false; //se nao tem o valor
-  int i = 1;
-  while(i <= raiz->numChaves && chave > raiz->chave[i]) i++;
-
-  if(i <= raiz->numChaves && chave == raiz->chave[i]) {
-    if(raiz->filhos[i] && raiz->filhos[i]->folha) { 
-      if(raiz->chave[i]->numChaves >= t) { //se tem mais que o minimo de chaves - CASO 1 
-        if(raiz->chave[i-1] && raiz->chave[i+1]) raiz->chave[i-1]->prox = raiz->chave[i]->prox; //caso esteja no meio
-        else if(raiz->chave[i-1]) raiz->chave[i-1]->prox = NULL; //caso o retirado eh o ultimo
-        else for(int j = 1; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
-        free(raiz->chave[i]); 
-        raiz->numChaves--;
+  int i = raiz->numChaves;
+  
+  if(!raiz->folha) {
+    while(i >= 1 && chave < raiz->chave[i]) i--;
+    i++;
+    if(!(raiz->folha) && raiz->filhos[i]->folha) {
+      if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
+        remover(raiz->filhos[i],chave);
       }
-      if(raiz->chave[i-1] && raiz->chave[i-1]->numChaves)
+      else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
+        juntar(raiz,i-1,i,raiz->filhos[i]);
+        remover(raiz->filhos[i],chave);
+      }
+      else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
+        juntar(raiz,i+1,i,raiz->filhos[i]);
+        remover(raiz->filhos[i],chave);
+      }
+      else { //nenhum tem como emprestar,
+        // descer a mediana do pai
+        // juntar os irmaos com a mediana no meio
+        
+      }
+    }
+    else {
+      while(i >= 1 && chave < raiz->chave[i]) i--;
+        if(raiz->numChaves >= t) { //se tem mais que o minimo de chaves - CASO 1 
+          if(raiz->chave[i-1] && raiz->chave[i+1]) { //caso esteja no meio
+            raiz->chave[i-1]->prox = raiz->chave[i]->prox; 
+            (int j = i; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1];
+          }
+          else if(raiz->chave[i-1]) raiz->chave[i-1]->prox = NULL; //caso o retirado eh o ultimo
+          else for(int j = 1; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
+          free(raiz->chave[i]); 
+          raiz->numChaves--;
+        }
+        if(raiz->chave[i-1] && raiz->chave[i-1]->numChaves)
 
-     
-
+       
  
 }
+
 void removerDaRaiz(ArvB* T, int k) {
   NO* r = alocaNo();
   r = T->raiz;
   if(r->numChaves == 0) return;
-  else remover(raiz,k);
+  else remover(r,k);
   if(r->numChaves == 0 && !(r->folha)) {
     T->raiz = r->filhos[1];
     free(r);
