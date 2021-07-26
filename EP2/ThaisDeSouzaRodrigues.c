@@ -30,9 +30,8 @@ bool split(NO* x,int indice, NO* y);
 void insercaoNaoCheia(NO* x,int k);
 bool insercao(ArvB* T, int k);
 bool juntar(NO* x,char caso, int i, NO* y,int c);
-bool remover(NO* raiz, int chave);
-void removerDaRaiz(ArvB* T, int k); 
-void imprimir(ArvB* T, NO* raiz);
+bool remover(NO* raiz, int chave); 
+void imprimir(FILE* f,ArvB* T, NO* raiz);
 
 ArvB* criaArvoreB(ArvB* T) {
   ArvB* criar = (ArvB*) malloc(sizeof(ArvB));
@@ -256,42 +255,30 @@ bool remover(NO* raiz,int chave) {
   }
 }
 
-
-void removerDaRaiz(ArvB* T, int k) {
-  NO* r = alocaNo();
-  r = T->raiz;
-  if(r->numChaves == 0) return;
-  else remover(r,k);
-  if(r->numChaves == 0 && !(r->folha)) {
-    T->raiz = r->filhos[1];
-    free(r);
-  }
-}
-
-void imprimir(ArvB* T, NO* raiz) {
+void imprimir(FILE* f, ArvB* T, NO* raiz) {
   if(T->raiz->numChaves == 0) {
-    printf("vazia \n");
+    fprintf(f,"vazia \n");
     return;
   }
   NO* atual = raiz;
-  printf("(");
+  fprintf(f,"(");
   for(int j = 1; j <= atual->numChaves+1;j++) {
     if(atual->folha) { 
       if(j <= atual->numChaves) {
         if(atual->chave[j]) {
-          if(j == 1) printf("%i ", atual->chave[j]);
-          else if(j == atual->numChaves) printf(" %i", atual->chave[j]);
-          else printf(" %i ", atual->chave[j]);
+          if(j == 1) fprintf(f,"%i ", atual->chave[j]);
+          else if(j == atual->numChaves) fprintf(f," %i", atual->chave[j]);
+          else fprintf(f," %i ", atual->chave[j]);
         }
       }
     }
     else {
-      imprimir(T,atual->filhos[j]);
-      if(j <= atual->numChaves) printf(" %i ", atual->chave[j]); // imprime a raiz
+      imprimir(f,T,atual->filhos[j]);
+      if(j <= atual->numChaves) fprintf(f," %i ", atual->chave[j]); // imprime a raiz
     }  
   }
-  if(T->raiz->chave[raiz->numChaves] == raiz->chave[raiz->numChaves]) printf(") \n"); 
-  else printf(")");
+  if(T->raiz->chave[raiz->numChaves] == raiz->chave[raiz->numChaves]) fprintf(f,") \n"); 
+  else fprintf(f,")");
 }
 
 int main(int argc,char *argv[]) {
@@ -301,20 +288,25 @@ int main(int argc,char *argv[]) {
     fsaida = fopen(argv[2],"w+");
     ArvB* arvore = criaArvoreB(arvore);
     char comando;
-    fscanf(f,"%c",&comando);
-    while (comando != EOF){
+    while (comando != 'f'){
       int num;
-      fscanf(f,"%i",&num);
       switch (comando) {
-        case 'i' : insercao(arvore,num); break;
-        case 'r' : remover(arvore->raiz,num); break;
-        case 'p' : imprimir(arvore,arvore->raiz); break;
-        case 'f' : return 0;
-        default: { //caso digite algo diferente
-          while (comando != '\n') scanf("%c",&comando);
-        }; 
+        case 'i': {
+          fscanf(f,"%i",&num);
+          insercao(arvore,num); 
+          break;
+        } 
+        case 'r' : {
+          fscanf(f,"%i",&num);
+          remover(arvore->raiz,num);
+          break;
+        }
+        case 'p' : imprimir(fsaida,arvore,arvore->raiz); break;
+        case 'f' : break;
+        case EOF: break;
+        default: break;
       }
-      fscanf(f,"%c",&comando);
+      fscanf(f,"%c ",&comando);
     }
   }
   fclose(f);
