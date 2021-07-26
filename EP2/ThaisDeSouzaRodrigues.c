@@ -29,7 +29,7 @@ NO* busca(NO* raiz,int chave);
 bool split(NO* x,int indice, NO* y);
 void insercaoNaoCheia(NO* x,int k);
 bool insercao(ArvB* T, int k);
-bool juntar(NO* x,char caso, int i, NO* y);
+bool juntar(NO* x,char caso, int i, NO* y,int c);
 bool remover(NO* raiz, int chave);
 void removerDaRaiz(ArvB* T, int k); 
 void imprimir(ArvB* T, NO* raiz);
@@ -138,10 +138,12 @@ bool insercao(ArvB* T, int k) {
 
 }
 
-bool juntar(NO* x,char caso, int i, NO* y) {
+bool juntar(NO* x,char caso, int i, NO* y,int c) {
   // y eh o da direita, que recebe 
   // x eh o pai 
+
   if(caso == 'e') { //esquerda empresta
+    printf("entrei e \n");
     y->numChaves++; //aumento mais um pra passar 
     for(int j = y->numChaves; j >= 1;j--) y->chave[j+1] = y->chave[j]; //pega o da esquerda e coloca na direita
     y->chave[1] = x->filhos[i-1]->chave[x->filhos[i-1]->numChaves]; //passo o emprestado pra direita
@@ -149,13 +151,33 @@ bool juntar(NO* x,char caso, int i, NO* y) {
     x->chave[i-1] = y->chave[1];
   }
   else if(caso == 'd') {
+    printf("entrei d \n");
     y->numChaves++;
     y->chave[y->numChaves+1] = x->filhos[i+1]->chave[1];
     x->chave[i] = x->filhos[i+1]->chave[1];
     for(int j = 1; j <= y->numChaves;j++) x->filhos[i+1]->chave[j] = x->filhos[i+1]->chave[j+1];
     x->filhos[i+1]->numChaves--;
   }
-  for(int r = 1; r <= x->filhos[i]->numChaves;r++) printf("x filho diret: %i ",x->filhos[i]->chave[r]);
+  else if(caso == 'n') {
+    printf("entrei n \n");
+    int repetido;
+    int k = i;
+    int menor = y->chave[k];
+    if(menor == c) {
+      k++;
+      menor = y->chave[k];
+    }
+    printf("!!!!!!!!!!! ANTES !!!!!!!!! \n");
+    for(int r = 1; r <= x->filhos[i+1]->numChaves;r++) printf("x filho diret y: %i ",x->filhos[i+1]->chave[r]);
+    printf("\n");
+    for(int r = 1; r <= x->filhos[i-1]->numChaves;r++) printf("x filho esq: %i ",x->filhos[i-1]->chave[r]);
+    printf("\n");
+    for(int r = 1; r <= x->numChaves;r++) printf("x pai: %i ",x->chave[r]);
+    printf("\n");
+    x->chave[i] = y->chave[k];
+  }
+  printf("!!!!!!!!!!! DEPOIS !!!!!!!!!\n");
+  for(int r = 1; r <= x->filhos[i+1]->numChaves;r++) printf("x filho diret y: %i ",x->filhos[i+1]->chave[r]);
     printf("\n");
   for(int r = 1; r <= x->filhos[i-1]->numChaves;r++) printf("x filho esq: %i ",x->filhos[i-1]->chave[r]);
     printf("\n");
@@ -172,7 +194,12 @@ bool remover(NO* raiz,int chave) {
   i++;
   if(!(raiz->folha) && raiz->filhos[i]->folha) {
     if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
-      printf("entrei if 2 de chave %i \n",raiz->chave[i]);
+      if(raiz->chave[i-1] == chave) {
+        int k = i;
+        printf("entrei if 2 de chave %i \n",raiz->chave[k-1]);
+        char caso = 'n';
+        juntar(raiz,caso,k-1,raiz->filhos[k-1],chave);
+      }
       remover(raiz->filhos[i],chave);
     }
     else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
@@ -181,7 +208,7 @@ bool remover(NO* raiz,int chave) {
       int s = 1;
       for(int k = 1; k <= raiz->filhos[i]->numChaves;k++) printf("%i ",raiz->filhos[i]->chave[k]);
       printf("\n");
-      juntar(raiz,caso,i,raiz->filhos[i]);
+      juntar(raiz,caso,i,raiz->filhos[i],chave);
       for(int k = 1; k <= raiz->filhos[i]->numChaves;k++) printf("%i ",raiz->filhos[i]->chave[k]);
       printf("\n");
       remover(raiz->filhos[i],chave);
@@ -189,7 +216,7 @@ bool remover(NO* raiz,int chave) {
     else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
       printf("caso direita \n");
       char caso = 'd';
-      juntar(raiz,caso,i,raiz->filhos[i]);
+      juntar(raiz,caso,i,raiz->filhos[i],chave);
       remover(raiz->filhos[i],chave);
     }
     else { //os irmaos nao podem ajudar, entao junta os irmaos
@@ -215,13 +242,11 @@ bool remover(NO* raiz,int chave) {
   }
   else if(raiz->folha) {
     i--;
-    printf("entrei raiz %i \n",raiz->chave[i]);
+    printf("entrei no elimina folha: raiz %i \n",raiz->chave[i]);
     if((raiz->chave[i-1]) && (raiz->chave[i+1])) { //caso esteja no meio
-     printf("entrei if folha \n");
-     for(int j = i; j <= raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1];
+      for(int j = i; j <= raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1];
     }
     else if(i == 1) for(int j = 1; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
-    else printf("meio erradinho %i \n",i);
     raiz->numChaves--;
   }
   else {
