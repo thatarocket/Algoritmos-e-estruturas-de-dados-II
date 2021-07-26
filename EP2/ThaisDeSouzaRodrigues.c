@@ -127,7 +127,24 @@ bool insercao(ArvB* T, int k) {
 
 }
 
-bool juntar(NO* x,int i, NO* y, NO* z) {}
+bool juntar(NO* x,char caso, int i, NO* y) {
+  // y eh o da direita, que recebe 
+  // x eh o pai 
+  if(caso == 'e') { //esquerda empresta
+    y->numChaves++; //aumento mais um pra passar 
+    for(int j = 1; j <= y->numChaves;j++) y->chave[j+1] = y->chave[j]; //pega o da esquerda e coloca na direita
+    y->chave[1] = x->filhos[i-1]->chave[x->filhos[i-1]->numChaves+1]; //passo o emprestado pra direita
+    x->filhos[i-1]->numChaves--;
+    x->chave[i] = y->chave[1];
+  }
+  else if(caso == 'd') {
+    y->numChaves++;
+    y->chave[y->numChaves+1] = x->filhos[i+1]->chave[1];
+    x->chave[i] = x->filhos[i+1]->chave[1];
+    for(int j = 1; j <= y->numChaves;j++) x->filhos[i+1]->chave[j] = x->filhos[i+1]->chave[j+1];
+    x->filhos[i+1]->numChaves--;
+  }
+}
 
 bool remover(NO* raiz,int chave) {
   printf("REMOVER \n");
@@ -135,44 +152,56 @@ bool remover(NO* raiz,int chave) {
   if(!busca(raiz,chave)) return false; //se nao tem o valor
   int i = raiz->numChaves;
   
-  if(!raiz->folha) {
-    while(i >= 1 && chave < raiz->chave[i]) i--;
-    i++;
-    if(!(raiz->folha) && raiz->filhos[i]->folha) {
-      if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
-        remover(raiz->filhos[i],chave);
+  while(i >= 1 && chave < raiz->chave[i]) i--;
+  //i++;
+  if(!(raiz->folha) && raiz->filhos[i]->folha) {
+    if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
+      remover(raiz->filhos[i],chave);
+    }
+    else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
+      char caso = 'e';
+      int s = 1;
+      juntar(raiz,caso,i,raiz->filhos[i]);
+      remover(raiz->filhos[i],chave);
+    }
+    else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
+      char caso = 'd';
+      juntar(raiz,caso,i,raiz->filhos[i]);
+      remover(raiz->filhos[i],chave);
+    }
+    else { //os irmaos nao podem ajudar, entao junta os irmaos
+      if(raiz->filhos[i] && raiz->filhos[i-1]) { //se tem elemento na esquerda(nao eh o primeiro)
+        int tamAnt = raiz->filhos[i-1]->numChaves;
+        raiz->filhos[i-1]->numChaves += raiz->filhos[i]->numChaves; //acerta o numChaves 
+        for(int k = 1; k <= raiz->filhos[i]->numChaves;k++) raiz->filhos[i-1]->chave[tamAnt+k] = raiz->filhos[i]->chave[k];//acrescenta itens
+        for(int r = i; r <= raiz->numChaves+1;r++) raiz->filhos[r] = raiz->filhos[r+1]; //arruma filhos do pai
+        for(int t = i; t <= raiz->numChaves;t++) raiz->chave[t] = raiz->chave[t+1]; //arruma chaves do pai
+        remover(raiz->filhos[i],chave); //agora pra eliminar da folha
       }
-      else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
-        juntar(raiz,i-1,i,raiz->filhos[i]);
-        remover(raiz->filhos[i],chave);
-      }
-      else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
-        juntar(raiz,i+1,i,raiz->filhos[i]);
-        remover(raiz->filhos[i],chave);
-      }
-      else { //nenhum tem como emprestar,
-        // descer a mediana do pai
-        // juntar os irmaos com a mediana no meio
-        
+      else if(raiz->filhos[i] && raiz->filhos[i+1]) { //nao tem elemento da esquerda(eh o primeiro)
+        int tamAnt = raiz->filhos[i+1]->numChaves;
+        raiz->filhos[i+1]->numChaves += raiz->filhos[i]->numChaves;
+        for(int k = 1; k <= raiz->filhos[i]->numChaves;k++) raiz->filhos[i+1]->chave[t+1] = raiz->filhos[i+1]->chave[t]; //passa o i+1 para o lado para dar espaco para o da esquerda entrar
+        for(int t = 1; t <= raiz->filhos[i]->numChaves;t++) raiz->filhos[i+1]->chaves[t] = raiz->filhos[i]->chave[t]; //insere o da esquerda
+        for(int r = i; r <= raiz->numChaves+1;r++) raiz->filhos[r] = raiz->filhos[r+1]; //arruma filhos do pai
+        for(int t = i; t <= raiz->numChaves;t++) raiz->chave[t] = raiz->chave[t+1]; //arruma chaves do pai
+        remover(raiz->filhos[i],chave); //agora pra eliminar da folha
       }
     }
-    else {
-      while(i >= 1 && chave < raiz->chave[i]) i--;
-        if(raiz->numChaves >= t) { //se tem mais que o minimo de chaves - CASO 1 
-          if(raiz->chave[i-1] && raiz->chave[i+1]) { //caso esteja no meio
-            raiz->chave[i-1]->prox = raiz->chave[i]->prox; 
-            (int j = i; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1];
-          }
-          else if(raiz->chave[i-1]) raiz->chave[i-1]->prox = NULL; //caso o retirado eh o ultimo
-          else for(int j = 1; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
-          free(raiz->chave[i]); 
-          raiz->numChaves--;
-        }
-        if(raiz->chave[i-1] && raiz->chave[i-1]->numChaves)
-
-       
- 
+  }
+  else if(raiz->folha) {
+    if(raiz->chave[i-1] && raiz->chave[i+1]) { //caso esteja no meio
+      raiz->chave[i-1]->prox = raiz->chave[i]->prox; 
+      for(int j = i; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1];
+    }
+    else if(raiz->chave[i-1]) raiz->chave[i-1]->prox = NULL; //caso o retirado eh o ultimo
+    else for(int j = 1; j < raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
+    free(raiz->chave[i]); 
+    raiz->numChaves--;
+  }
+  else remover(raiz,raiz->filhos[i]);
 }
+
 
 void removerDaRaiz(ArvB* T, int k) {
   NO* r = alocaNo();
