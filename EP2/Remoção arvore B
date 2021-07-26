@@ -1,7 +1,7 @@
 Remoção arvore B
 Casos:
 
-1) Está na folha
+1) Está na folha - CHECK
 -> Simplesmente remove
 
 2) Chave está em um nó interno
