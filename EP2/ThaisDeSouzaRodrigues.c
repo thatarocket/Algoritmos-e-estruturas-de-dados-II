@@ -51,9 +51,10 @@ NO* alocaNo() {
 
 NO* busca(NO* raiz,int chave) {
   int i = 1;
-  NO* achado;
-  if(achado) return achado;
-  while(i <= raiz->numChaves && chave > raiz->chave[i]) i++;
+  NO* achado = NULL;
+  //bool encontrei = false
+  
+  while(i <= raiz->numChaves && chave >= raiz->chave[i]) i++;
   i--;
   if(i <= raiz->numChaves+1 && chave >= raiz->chave[i]) {
     if(raiz->folha) {
@@ -64,10 +65,8 @@ NO* busca(NO* raiz,int chave) {
     }
     else if(!raiz->folha) achado = busca(raiz->filhos[i+1],chave);
   }
-  else {
-    printf("%i e %i \n",i,raiz->chave[i]);
-    return NULL;
-  }
+
+  return achado;
 } 
 
 bool split(NO* x,int i, NO* y) { //lidando com o split que é do no interno
@@ -189,7 +188,11 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
 
 bool remover(NO* raiz,int chave) {
   printf("REMOVER %i \n",chave);
-  if(!busca(raiz,chave)) return false; //se nao tem o valor
+  if(!busca(raiz,chave)) {
+    printf("FALSO \n");
+    return false; 
+  }
+  else printf("TRUE \n"); //se nao tem o valor
   int i = raiz->numChaves;
   
   while(i >= 1 && chave < raiz->chave[i]) i--;
