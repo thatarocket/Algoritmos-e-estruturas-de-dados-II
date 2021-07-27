@@ -269,8 +269,8 @@ bool remover(ArvB* T,NO* raiz,int chave) { //remove um elemento, caso exista
   
       raiz->chave[i-1] = andando->chave[andando->numChaves];
       andando->numChaves--;
-      insercao(T,raiz->chave[i-1]);
-      remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
+      insercao(T,raiz->chave[i-1]); //ajeita o que pegou da esquerda
+      remover(T,raiz->filhos[i],chave); 
     }
     remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
   }
