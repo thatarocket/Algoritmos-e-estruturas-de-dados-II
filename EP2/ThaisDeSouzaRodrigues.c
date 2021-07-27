@@ -1,6 +1,7 @@
-// Thais de Souza Rodrigues - 11796941
-// AED - EP2
-// Arvore B+
+/* ######## Thais de Souza Rodrigues ###########
+   ########   Número USP: 11796941   ###########
+   ########        AED - EP2         ###########
+   ########        Arvore B+         ########### */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +13,8 @@
 typedef int TipoChave;
 
 typedef struct str_no {
-  TipoChave chave[2*t]; //max chaves do no. 2t-1 com 0 = 2t
-  struct str_no* filhos[2*t+1]; //max filhos do no. 2t com 0 = 2t+1
+  TipoChave chave[2*t]; //max chaves do no. Onde eh 2t-1, mas considerando a posicao 0 = 2t
+  struct str_no* filhos[2*t+1]; //max filhos do no. Onde eh 2t, mas considerando a posicao 0 = 2t+1
   int numChaves; //num chaves armazenadas
   bool folha; //folha ou no interno
   struct str_no* prox;
@@ -23,6 +24,7 @@ typedef struct {
   NO* raiz;
 } ArvB;
 
+// Métodos implementados 
 ArvB* criaArvoreB(ArvB* T);
 NO* alocaNo();
 NO* busca(NO* raiz,int chave);
@@ -30,7 +32,8 @@ bool split(NO* x,int indice, NO* y);
 void insercaoNaoCheia(NO* x,int k);
 bool insercao(ArvB* T, int k);
 bool juntar(NO* x,char caso, int i, NO* y,int c);
-bool remover(NO* raiz, int chave); 
+bool arrumaProx(ArvB* T);
+bool remover(ArvB* T,NO* raiz, int chave); 
 void imprimir(FILE* f,ArvB* T, NO* raiz);
 
 ArvB* criaArvoreB(ArvB* T) {
@@ -44,12 +47,12 @@ ArvB* criaArvoreB(ArvB* T) {
   return criar;
 }
 
-NO* alocaNo() {
+NO* alocaNo() { //aloca memoria para o no
   NO* x = (NO*) malloc(sizeof(NO));
   return x;
 }
 
-NO* busca(NO* raiz,int chave) {
+NO* busca(NO* raiz,int chave) { //busca elementos na arvore
   int i = 1;
   NO* achado = NULL;
 
@@ -68,7 +71,7 @@ NO* busca(NO* raiz,int chave) {
   return achado;
 } 
 
-bool split(NO* x,int i, NO* y) { 
+bool split(NO* x,int i, NO* y) { //realiza a separacao dos elementos, caso necessario
   NO* z = alocaNo();
   z->folha = y->folha;
 
@@ -117,7 +120,7 @@ void insercaoNaoCheia(NO* x,int k) {
   }
 }
 
-bool insercao(ArvB* T, int k) {
+bool insercao(ArvB* T, int k) { //insere elementos na arvore
   NO* r = T->raiz;
   if(r->numChaves == (2*t-1)) { //está cheio na raiz
     NO* s = alocaNo();
@@ -133,18 +136,16 @@ bool insercao(ArvB* T, int k) {
 
 }
 
-bool juntar(NO* x,char caso, int i, NO* y,int c) {
-  // y eh o da direita, que recebe 
-  // x eh o pai 
-
+bool juntar(NO* x,char caso, int i, NO* y,int c) { //junta os elementos da arvore, caso necessario
+ 
   if(caso == 'e') { //esquerda empresta
-    y->numChaves++; //aumento mais um pra passar 
+    y->numChaves++; //aumento mais um nas chaves, para poder passar 
     for(int j = y->numChaves; j >= 1;j--) y->chave[j+1] = y->chave[j]; //pega o da esquerda e coloca na direita
     y->chave[1] = x->filhos[i-1]->chave[x->filhos[i-1]->numChaves]; //passo o emprestado pra direita
     x->filhos[i-1]->numChaves--;
     x->chave[i-1] = y->chave[1];
   }
-  else if(caso == 'd') {
+  else if(caso == 'd') { //direita empresta
     y->numChaves++;
     y->chave[y->numChaves+1] = x->filhos[i+1]->chave[1];
       
@@ -152,20 +153,17 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
     x->filhos[i+1]->numChaves--;
 
     int menor;
-    int indice;
     int primeiro = i;
     for(int v = i; v <= x->numChaves+1;v++) {
-      if(v == primeiro) {
-        menor = x->filhos[i+1]->chave[v];
-      }
-      else if(menor == c) {
+      if(v == primeiro) menor = x->filhos[i+1]->chave[v];
+      else if(menor == c) { //pode acontecer da primeira chaver ser a que vai ser eliminada
         menor = x->filhos[i+1]->chave[v];
         break;
       }
     } 
     x->chave[i] = menor;
   }
-  else if(caso == 'n') {
+  else if(caso == 'n') { //nao eh necessario ninguem emprestar
     int menor;
     int indice;
     for(int v = 1; v <= y->numChaves;v++) {
@@ -182,30 +180,41 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
   }
 }
 
-bool remover(NO* raiz,int chave) {
-  if(!busca(raiz,chave)) return false; //se nao tem o valor
+bool arrumaProx(ArvB* T) { //corrige os ponteiros das folhas
+  NO* arrumando = T->raiz;
+  int i = 1;
+  while(i <= arrumando->numChaves+1) { //cada filho deve apontar para a proxima folha, caso tenha
+    if(i <= arrumando->numChaves) arrumando->filhos[i]->prox = arrumando->filhos[i+1];
+    if(i == arrumando->numChaves+1) arrumando->filhos[i]->prox = NULL;
+    i++;
+  }
+  return true;
+}
+
+bool remover(ArvB* T,NO* raiz,int chave) { //remove um elemento, caso exista
+  if(!busca(raiz,chave)) return false; //se nao tem o valor para eliminar
   int i = raiz->numChaves;
   while(i >= 1 && chave < raiz->chave[i]) i--;
   i++;
   if(!(raiz->folha) && raiz->filhos[i]->folha) {
-    if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
+    if(raiz->filhos[i]->numChaves >= t) { // o lugar do removido da folha ja tem mais que o minimo
       if(raiz->chave[i-1] == chave) {
         int k = i;
         char caso = 'n';
         juntar(raiz,caso,k-1,raiz->filhos[k],chave);
       }
-      remover(raiz->filhos[i],chave);
+      remover(T,raiz->filhos[i],chave);
     }
     else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
       char caso = 'e';
       int s = 1;
       juntar(raiz,caso,i,raiz->filhos[i],chave);
-      remover(raiz->filhos[i],chave);
+      remover(T,raiz->filhos[i],chave);
     }
     else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
       char caso = 'd';
       juntar(raiz,caso,i,raiz->filhos[i],chave);
-      remover(raiz->filhos[i],chave);
+      remover(T,raiz->filhos[i],chave);
     }
     else { //os irmaos nao podem ajudar, entao junta os irmaos
 
@@ -219,7 +228,7 @@ bool remover(NO* raiz,int chave) {
         for(int j = i; j <= raiz->numChaves;j++) raiz->filhos[j] = raiz->filhos[j+1]; //arrumando os filhos da raiz
         for(int j = i-1; j <=raiz->numChaves;j++) raiz->chave[j] = raiz->chave[j+1]; //arrumando as chaves da raiz
         raiz->numChaves--;
-        remover(raiz->filhos[i-1],chave); //agora pra eliminar da folha
+        remover(T,raiz->filhos[i-1],chave); //agora pra eliminar da folha
       }
       else if(i == 1) { //nao tem elemento da esquerda(eh o primeiro)
         int tamAnt = raiz->filhos[i+1]->numChaves;
@@ -233,11 +242,11 @@ bool remover(NO* raiz,int chave) {
         for(int j = i; j <= raiz->numChaves;j++) raiz->filhos[j] = raiz->filhos[j+1]; //arrumando os filhos da raiz
         for(int j = i-1; j <=raiz->numChaves;j++) raiz->chave[j] = raiz->chave[j+1];
         raiz->numChaves--;
-        remover(raiz->filhos[i],chave); //agora pra eliminar da folha
+        remover(T,raiz->filhos[i],chave); //agora pra eliminar da folha
       }
     }
   }
-  else if(raiz->folha) {
+  else if(raiz->folha) { //Se eh folha, eh o momento para eliminar
     i--;
     int posic = -1;
     for(int j = 1; j <= raiz->numChaves;j++) {
@@ -246,13 +255,14 @@ bool remover(NO* raiz,int chave) {
         break;
       }
     }
-    for(int j = posic; j <= raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
+    for(int j = posic; j <= raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso seja o primeiro da lista
     raiz->numChaves--;
+    arrumaProx(T); //arruma os ponteiros das folhas
   }
-  else remover(raiz->filhos[i],chave);
+  else remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
 }
 
-void imprimir(FILE* f, ArvB* T, NO* raiz) {
+void imprimir(FILE* f, ArvB* T, NO* raiz) { //imprime a arvore atual
   if(T->raiz->numChaves == 0) {
     fprintf(f,"vazia \n");
     return;
@@ -295,7 +305,7 @@ int main(int argc,char *argv[]) {
         } 
         case 'r' : {
           fscanf(f,"%i",&num);
-          remover(arvore->raiz,num);
+          remover(arvore,arvore->raiz,num);
           break;
         }
         case 'p' : imprimir(fsaida,arvore,arvore->raiz); break;
