@@ -52,11 +52,9 @@ NO* alocaNo() {
 NO* busca(NO* raiz,int chave) {
   int i = 1;
   NO* achado = NULL;
-  //bool encontrei = false
-  
+
   while(i <= raiz->numChaves && chave >= raiz->chave[i]) i++;
   i--;
-  printf("sou o %i e i %i \n",raiz->chave[i],i);
   if(i <= raiz->numChaves+1 && chave >= raiz->chave[i]) {
     if(raiz->folha) {
       for(int i = 1; i <= raiz->numChaves;i++) {
@@ -66,13 +64,11 @@ NO* busca(NO* raiz,int chave) {
     }
     else if(!raiz->folha) achado = busca(raiz->filhos[i+1],chave);
   }
-  else if(i == 0) achado = busca(raiz->filhos[1],chave);
-
+  else if(i == 0 && !(raiz->folha)) achado = busca(raiz->filhos[1],chave);
   return achado;
 } 
 
-bool split(NO* x,int i, NO* y) { //lidando com o split que é do no interno
-  //printf("split \n");
+bool split(NO* x,int i, NO* y) { 
   NO* z = alocaNo();
   z->folha = y->folha;
 
@@ -122,7 +118,6 @@ void insercaoNaoCheia(NO* x,int k) {
 }
 
 bool insercao(ArvB* T, int k) {
-  //printf("inserindo o %i \n",k);
   NO* r = T->raiz;
   if(r->numChaves == (2*t-1)) { //está cheio na raiz
     NO* s = alocaNo();
@@ -143,7 +138,7 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
   // x eh o pai 
 
   if(caso == 'e') { //esquerda empresta
-    //printf("entrei e \n");
+    printf("entrei e \n");
     y->numChaves++; //aumento mais um pra passar 
     for(int j = y->numChaves; j >= 1;j--) y->chave[j+1] = y->chave[j]; //pega o da esquerda e coloca na direita
     y->chave[1] = x->filhos[i-1]->chave[x->filhos[i-1]->numChaves]; //passo o emprestado pra direita
@@ -151,25 +146,27 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
     x->chave[i-1] = y->chave[1];
   }
   else if(caso == 'd') {
-    //printf("entrei d \n");
+    printf("entrei d \n");
     y->numChaves++;
     y->chave[y->numChaves+1] = x->filhos[i+1]->chave[1];
-    x->chave[i] = x->filhos[i+1]->chave[1];
+    //x->chave[i] = x->filhos[i+1]->chave[1];
+    
     for(int j = 1; j <= y->numChaves;j++) x->filhos[i+1]->chave[j] = x->filhos[i+1]->chave[j+1];
     x->filhos[i+1]->numChaves--;
+
     int menor;
     int indice;
-    /* for(int v = 1; v <= x->filhos[i+2]->numChaves;v++) {
-      if(v == 1) {
-        menor = x->filhos[i+2]->chave[v];
-        indice = v;
+    int primeiro = i;
+    for(int v = i; v <= x->numChaves+1;v++) {
+      if(v == primeiro) {
+        menor = x->filhos[i+1]->chave[v];
       }
       else if(menor == c) {
-        menor = y->chave[v];
-        indice = v;
+        menor = x->filhos[i+1]->chave[v];
+        break;
       }
     } 
-    x->chave[i] = y->chave[indice]; */
+    x->chave[i] = menor;
   }
   else if(caso == 'n') {
     int menor;
@@ -190,11 +187,7 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
 
 bool remover(NO* raiz,int chave) {
   printf("REMOVER %i \n",chave);
-  if(!busca(raiz,chave)) {
-    printf("FALSO \n");
-    return false; 
-  }
-  else printf("TRUE \n"); //se nao tem o valor
+  if(!busca(raiz,chave)) return false; //se nao tem o valor
   int i = raiz->numChaves;
   
   while(i >= 1 && chave < raiz->chave[i]) i--;
