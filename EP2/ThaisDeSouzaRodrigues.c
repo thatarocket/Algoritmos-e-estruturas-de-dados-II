@@ -56,6 +56,7 @@ NO* busca(NO* raiz,int chave) {
   
   while(i <= raiz->numChaves && chave >= raiz->chave[i]) i++;
   i--;
+  printf("sou o %i e i %i \n",raiz->chave[i],i);
   if(i <= raiz->numChaves+1 && chave >= raiz->chave[i]) {
     if(raiz->folha) {
       for(int i = 1; i <= raiz->numChaves;i++) {
@@ -65,6 +66,7 @@ NO* busca(NO* raiz,int chave) {
     }
     else if(!raiz->folha) achado = busca(raiz->filhos[i+1],chave);
   }
+  else if(i == 0) achado = busca(raiz->filhos[1],chave);
 
   return achado;
 } 
