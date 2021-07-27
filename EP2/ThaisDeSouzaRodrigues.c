@@ -259,7 +259,21 @@ bool remover(ArvB* T,NO* raiz,int chave) { //remove um elemento, caso exista
     raiz->numChaves--;
     arrumaProx(T); //arruma os ponteiros das folhas
   }
-  else remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
+  else if(!raiz->folha) { 
+    
+    if(raiz->chave[i-1] == chave) {
+      NO* andando = raiz;
+
+      while(!andando->filhos[i-1]->folha) andando = andando->filhos[i-1];
+      andando = andando->filhos[andando->numChaves+1];
+  
+      raiz->chave[i-1] = andando->chave[andando->numChaves];
+      andando->numChaves--;
+      insercao(T,raiz->chave[i-1]);
+      remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
+    }
+    remover(T,raiz->filhos[i],chave); //ainda nao chegou nas folhas
+  }
 }
 
 void imprimir(FILE* f, ArvB* T, NO* raiz) { //imprime a arvore atual
