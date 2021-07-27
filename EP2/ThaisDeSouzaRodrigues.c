@@ -216,7 +216,7 @@ bool remover(NO* raiz,int chave) {
       remover(raiz->filhos[i],chave);
     }
     else { //os irmaos nao podem ajudar, entao junta os irmaos
-      printf("entrei else 1 %i e i %i \n",raiz->chave[i],i);
+      printf("entrei else 1: %i e i %i \n",raiz->chave[i],i);
       printf("filho dele %i \n",raiz->filhos[i]->chave[1]);
 
       if(i > 1) { //se tem elemento na esquerda(nao eh o primeiro)
@@ -237,11 +237,13 @@ bool remover(NO* raiz,int chave) {
         int tamAnt = raiz->filhos[i+1]->numChaves;
         raiz->filhos[i+1]->numChaves += raiz->filhos[i]->numChaves; //acerta o numChaves 
 
-        for(int k = 1; k < raiz->filhos[i]->numChaves;k++) 
+        for(int k = 1; k <= raiz->filhos[i]->numChaves;k++) 
           raiz->filhos[i+1]->chave[k+1] = raiz->filhos[i+1]->chave[k]; //passa para o lado para dar espaco para o da esquerda entrar
-        
+    
         for(int m = 1; m <= raiz->filhos[i]->numChaves;m++) raiz->filhos[i+1]->chave[m] = raiz->filhos[i]->chave[m]; //insere o da esquerda
+
         for(int j = i; j <= raiz->numChaves;j++) raiz->filhos[j] = raiz->filhos[j+1]; //arrumando os filhos da raiz
+        for(int j = i-1; j <=raiz->numChaves;j++) raiz->chave[j] = raiz->chave[j+1];
         raiz->numChaves--;
         remover(raiz->filhos[i],chave); //agora pra eliminar da folha
       }
