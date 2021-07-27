@@ -138,7 +138,6 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
   // x eh o pai 
 
   if(caso == 'e') { //esquerda empresta
-    printf("entrei e \n");
     y->numChaves++; //aumento mais um pra passar 
     for(int j = y->numChaves; j >= 1;j--) y->chave[j+1] = y->chave[j]; //pega o da esquerda e coloca na direita
     y->chave[1] = x->filhos[i-1]->chave[x->filhos[i-1]->numChaves]; //passo o emprestado pra direita
@@ -146,11 +145,9 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
     x->chave[i-1] = y->chave[1];
   }
   else if(caso == 'd') {
-    printf("entrei d \n");
     y->numChaves++;
     y->chave[y->numChaves+1] = x->filhos[i+1]->chave[1];
-    //x->chave[i] = x->filhos[i+1]->chave[1];
-    
+      
     for(int j = 1; j <= y->numChaves;j++) x->filhos[i+1]->chave[j] = x->filhos[i+1]->chave[j+1];
     x->filhos[i+1]->numChaves--;
 
@@ -186,38 +183,31 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
 }
 
 bool remover(NO* raiz,int chave) {
-  printf("REMOVER %i \n",chave);
   if(!busca(raiz,chave)) return false; //se nao tem o valor
   int i = raiz->numChaves;
-  
   while(i >= 1 && chave < raiz->chave[i]) i--;
   i++;
   if(!(raiz->folha) && raiz->filhos[i]->folha) {
     if(raiz->filhos[i]->numChaves >= t) { // o removido da folha ja tem mais que o minimo
       if(raiz->chave[i-1] == chave) {
         int k = i;
-        printf("entrei if 2 de chave %i \n",raiz->chave[k-1]);
         char caso = 'n';
         juntar(raiz,caso,k-1,raiz->filhos[k],chave);
       }
       remover(raiz->filhos[i],chave);
     }
     else if(raiz->filhos[i-1] && raiz->filhos[i-1]->numChaves >= t) { // o irmao da esquerda tem como emprestar
-      printf("caso esquerda \n");
       char caso = 'e';
       int s = 1;
       juntar(raiz,caso,i,raiz->filhos[i],chave);
       remover(raiz->filhos[i],chave);
     }
     else if(raiz->filhos[i+1] && raiz->filhos[i+1]->numChaves >= t) { // o irmao da direita tem como emprestar
-      printf("caso direita \n");
       char caso = 'd';
       juntar(raiz,caso,i,raiz->filhos[i],chave);
       remover(raiz->filhos[i],chave);
     }
     else { //os irmaos nao podem ajudar, entao junta os irmaos
-      printf("entrei else 1: %i e i %i \n",raiz->chave[i],i);
-      printf("filho dele %i \n",raiz->filhos[i]->chave[1]);
 
       if(i > 1) { //se tem elemento na esquerda(nao eh o primeiro)
         int tamAnt = raiz->filhos[i-1]->numChaves; //tamanho anterior da esquerda
@@ -229,11 +219,9 @@ bool remover(NO* raiz,int chave) {
         for(int j = i; j <= raiz->numChaves;j++) raiz->filhos[j] = raiz->filhos[j+1]; //arrumando os filhos da raiz
         for(int j = i-1; j <=raiz->numChaves;j++) raiz->chave[j] = raiz->chave[j+1]; //arrumando as chaves da raiz
         raiz->numChaves--;
-        printf("raiz->filhos[i-1]: %i \n",raiz->filhos[i-1]->chave[1]);
         remover(raiz->filhos[i-1],chave); //agora pra eliminar da folha
       }
       else if(i == 1) { //nao tem elemento da esquerda(eh o primeiro)
-        printf("else if 1 \n");
         int tamAnt = raiz->filhos[i+1]->numChaves;
         raiz->filhos[i+1]->numChaves += raiz->filhos[i]->numChaves; //acerta o numChaves 
 
@@ -252,7 +240,6 @@ bool remover(NO* raiz,int chave) {
   else if(raiz->folha) {
     i--;
     int posic = -1;
-    printf("entrei no elimina folha: raiz %i com i:%i \n",raiz->chave[1],i);
     for(int j = 1; j <= raiz->numChaves;j++) {
       if(raiz->chave[j] == chave) {
         posic = j;
@@ -262,10 +249,7 @@ bool remover(NO* raiz,int chave) {
     for(int j = posic; j <= raiz->numChaves; j++) raiz->chave[j] = raiz->chave[j+1]; //caso chega o primeiro da lista
     raiz->numChaves--;
   }
-  else {
-    printf("entrou no else restante \n");
-    remover(raiz->filhos[i],chave);
-  }
+  else remover(raiz->filhos[i],chave);
 }
 
 void imprimir(FILE* f, ArvB* T, NO* raiz) {
