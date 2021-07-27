@@ -156,6 +156,19 @@ bool juntar(NO* x,char caso, int i, NO* y,int c) {
     x->chave[i] = x->filhos[i+1]->chave[1];
     for(int j = 1; j <= y->numChaves;j++) x->filhos[i+1]->chave[j] = x->filhos[i+1]->chave[j+1];
     x->filhos[i+1]->numChaves--;
+    int menor;
+    int indice;
+    /* for(int v = 1; v <= x->filhos[i+2]->numChaves;v++) {
+      if(v == 1) {
+        menor = x->filhos[i+2]->chave[v];
+        indice = v;
+      }
+      else if(menor == c) {
+        menor = y->chave[v];
+        indice = v;
+      }
+    } 
+    x->chave[i] = y->chave[indice]; */
   }
   else if(caso == 'n') {
     int menor;
@@ -266,9 +279,9 @@ void imprimir(FILE* f, ArvB* T, NO* raiz) {
     if(atual->folha) { 
       if(j <= atual->numChaves) {
         if(atual->chave[j]) {
-          if(j == 1) fprintf(f,"%i ", atual->chave[j]);
-          else if(j == atual->numChaves) fprintf(f," %i", atual->chave[j]);
-          else fprintf(f," %i ", atual->chave[j]);
+          if(j == 1) fprintf(f,"%i", atual->chave[j]);
+          else if(j == atual->numChaves && j != 1) fprintf(f," %i", atual->chave[j]);
+          else if(j != atual->numChaves) fprintf(f," %i", atual->chave[j]);
         }
       }
     }
